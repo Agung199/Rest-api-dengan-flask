@@ -49,14 +49,74 @@ class User(db.Model):
 # variabel global sederhana (tetap jika diperlukan)
 identitas = {}
 
-class ContohResource(Resource):
-    def get(self):
-        # contoh: kembalikan semua user dari DB
-        users = User.query.all()
-        return {"users": [u.to_dict() for u in users]}, 200
+class UserResource(Resource):
+    """
+    Satu resource untuk:
+    - GET /api           -> list semua user
+    - POST /api          -> buat user baru
+    - GET /api/<id>      -> ambil user tertentu
+    - PUT /api/<id>      -> update user
+    - DELETE /api/<id>   -> hapus user
+    """
 
+    def get(self, user_id=None):
+        if user_id is None:
+            # return list semua user
+            users = User.query.all()
+            return {"users": [u.to_dict() for u in users]}, 200
+        else:
+            # return single user
+            user = User.query.get(user_id)
+            if not user:
+                return {"msg": "User tidak ditemukan."}, 404
+            return {"user": user.to_dict()}, 200
+        
+    
     def post(self):
-        # dukung form-data atau JSON
+        # create new user (POST ke /api)
+        if request.is_json:
+            data = request.get_json()
+        else:
+            data = request.form.to_dict()
+
+        nama = (data.get("nama") or "").strip()
+        umur = data.get("umur")
+        alamat = data.get("alamat")
+
+        if not nama:
+            return {"msg": "Field 'nama' wajib diisi."}, 400
+        if len(nama) > 100:
+            return {"msg": "Field 'nama' terlalu panjang (max 100)."}, 400
+
+        umur_int = None
+        if umur is not None and umur != "":
+            try:
+                umur_int = int(umur)
+                if umur_int < 0:
+                    return {"msg": "Field 'umur' harus bilangan bulat tidak negatif."}, 400
+            except (ValueError, TypeError):
+                return {"msg": "Field 'umur' harus angka."}, 400
+
+        user = User(nama=nama, umur=umur_int, alamat=alamat)
+        try:
+            db.session.add(user)
+            db.session.commit()
+            return {"msg": "Data berhasil dimasukkan", "user": user.to_dict()}, 201
+        except Exception:
+            traceback.print_exc()
+            db.session.rollback()
+            return {"msg": "Terjadi kesalahan saat menyimpan data."}, 500
+    
+        
+    def put(self, user_id: None):
+        """
+        update user(partial allowed) Menerima JSON atau form-data
+        field yang tidak disertakan tidak diubah. untuk mengosongkan umur kirim.
+        """
+        users = User.query.get(user_id)
+        if not users:
+            return {"msg": "user tidak ditemukan."},404
+        
         if request.is_json:
             data = request.get_json()
         else:
@@ -66,25 +126,62 @@ class ContohResource(Resource):
         umur = data.get("umur")
         alamat = data.get("alamat")
 
-        if not nama:
-            return {"msg": "Field 'nama' wajib diisi."}, 400
+        # validate dan assign nama
+        if nama is not None:
+            nama = nama.strip()
+            if not nama:
+                return {"msg":"field 'nama' tidak boleh kosong."}, 400
+            if len(nama)> 100:
+                return {"msg": "field 'nama' terlalu panjang(max:100)."}, 400
+            users.nama = nama
+        
+        # validate dan assign umur
+        if umur is not None:
+            if umur == "":
+                users.umur = None
+            else:
+                try:
+                    umur_int = int(umur)
+                    if umur_int < 0:
+                        return {"msg": "filed 'umur' harus bilangan bulat tidak boleh negatif."}, 400
+                    users.umur = umur_int
+                except(ValueError, TypeError):
+                    return {"msg": "field 'nama' harus angka."}, 400
+                
+        # assign alamat(boleh kosong string)
+        if alamat is not None:
+            users.alamat = alamat
 
-        # jika umur diberikan sebagai string, coba ubah ke int (jaga safety)
-        umur_int = None
-        if umur:
-            try:
-                umur_int = int(umur)
-            except ValueError:
-                return {"msg": "Field 'umur' harus angka."}, 400
+        try:
+            db.session.commit()
+            return {"msg": "Data berhasil diperbarui.", "user": users.to_dict()}, 200
+        except Exception:
+            traceback.print_exc()
+            db.session.rollback()
+            return {"msg": "terjadi kesalahan penambahan."}, 500
+        
+    def delete(self, user_id=None):
+        # delete user (DELETE ke /api/<id>)
+        if user_id is None:
+            return {"msg": "User id diperlukan untuk menghapus."}, 400
 
-        user = User(nama=nama, umur=umur_int, alamat=alamat)
-        ok = user.save()
-        if ok:
-            return {"msg": "Data berhasil dimasukkan", "user": user.to_dict()}, 201
-        else:
-            return {"msg": "Terjadi kesalahan saat menyimpan data."}, 500
+        user = User.query.get(user_id)
+        if not user:
+            return {"msg": "User tidak ditemukan."}, 404
 
-api.add_resource(ContohResource, "/api", methods=["GET", "POST"])
+        try:
+            db.session.delete(user)
+            db.session.commit()
+            return {"msg": "User berhasil dihapus."}, 200
+        except Exception:
+            traceback.print_exc()
+            db.session.rollback()
+            return {"msg": "Terjadi kesalahan saat menghapus user."}, 500
+#api.add_resource(ContohResource, "/api", methods=["GET", "POST"])
+
+api.add_resource(UserResource, "/api", "/api/<int:user_id>")
+
+
 
 if __name__ == "__main__":
     # buat tabel dalam konteks aplikasi
