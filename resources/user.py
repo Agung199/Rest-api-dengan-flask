@@ -51,28 +51,20 @@ class UserResource(Resource):
             db.session.rollback()
             return {"msg": "Terjadi kesalahan update data."}, 500
 
-    @jwt_required()   # atau pakai verify_jwt_in_request() di dalam try
+   
+    @jwt_required()   # pastikan decorator ada bila perlu proteksi
     def delete(self, user_id):
         try:
-            # debug prints
-            print("=== DELETE called ===")
-            print("headers:", dict(request.headers))
-            try:
-                # ini akan raise kalau token invalid/missing
-                verify_jwt_in_request()
-                print("jwt identity:", get_jwt_identity())
-            except Exception as e:
-                print("JWT verify error:", repr(e))
-                raise
-
-            user = User.query.get(user_id)
+            # pastikan user_id integer untuk keamanan
+            user = User.query.get(int(user_id))
             if not user:
-                return {"msg":"User tidak ditemukan."}, 404
+                return {"msg": "User tidak ditemukan."}, 404
+
             db.session.delete(user)
             db.session.commit()
-            return {"msg":"User berhasil dihapus."}, 200
+            return {"msg": "User berhasil dihapus."}, 200
 
         except Exception as e:
             db.session.rollback()
             import traceback; traceback.print_exc()
-            return {"msg": "Terjadi kesalahan: "+str(e)}, 500
+            return {"msg": f"Terjadi kesalahan saat menghapus user: {str(e)}"}, 500
