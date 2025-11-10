@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Dashboard - Flask App</title>
+  <link href="{{ url_for('static', filename='css/style.css') }}" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+  <nav class="navbar navbar-light bg-light shadow-sm">
+    <div class="container">
+      <a class="navbar-brand">Flask Modular App</a>
+      <div class="d-flex align-items-center">
+        <div id="welcomeName" class="me-3"></div>
+        <div id="tokenShort" class="me-3 text-muted small"></div>
+        <button id="logoutBtn" class="btn btn-outline-danger btn-sm">Logout</button>
+      </div>
+    </div>
+  </nav>
+
+  <div class="container py-4">
+    <div class="card mb-3">
+      <div class="card-body">
+        <h4>Data Pengguna</h4>
+        <div class="mb-3">
+          <button id="getUsers" class="btn btn-primary">Refresh Daftar User</button>
+          <button id="getUsersNoAuth" class="btn btn-secondary ms-2">Tampilkan (tanpa token)</button>
+        </div>
+        <div class="table-responsive">
+          <table class="table table-sm table-striped" id="tabelUser">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Nama</th>
+                    <th>Umur</th>
+                    <th>Alamat</th>
+                    <th>Aksi</th>
+                </tr>
+            </thead>
+            <tbody>
+              {% for user in users %}
+              <tr data-user-id="{{ user.id }}">
+                <td>{{ user.id }}</td>
+                <td>{{ user.nama }}</td>
+                <td>{{ user.umur }}</td>
+                <td>{{ user.alamat }}</td>
+                <td>
+                  <button class="btn btn-secondary btn-sm btn-edit" data-id="{{ user.id }}">Edit</button>
+                  <button class="btn btn-danger btn-sm btn-hapus" data-id="{{ user.id }}">Hapus</button>
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <div id="debugArea" class="text-muted small"></div>
+  </div>
+<!-- Modal Edit User -->
+  <div class="modal fade" id="editUserModal" tabindex="-1" aria-labelledby="editUserModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <form id="editUserForm">
+          <div class="modal-header">
+            <h5 class="modal-title" id="editUserModalLabel">Edit Pengguna</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            <input type="hidden" id="editUserId">
+            <div class="mb-3">
+              <label for="editNama" class="form-label">Nama</label>
+              <input type="text" class="form-control" id="editNama" required>
+            </div>
+            <div class="mb-3">
+              <label for="editUmur" class="form-label">Umur</label>
+              <input type="number" class="form-control" id="editUmur" min="0">
+            </div>
+            <div class="mb-3">
+              <label for="editAlamat" class="form-label">Alamat</label>
+              <input type="text" class="form-control" id="editAlamat">
+            </div>
+            <div id="editError" class="text-danger" style="display:none;"></div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+            <button type="submit" class="btn btn-primary">Simpan Perubahan</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+</body>
+</html>

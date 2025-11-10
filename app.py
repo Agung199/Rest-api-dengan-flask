@@ -49,10 +49,15 @@ def create_app():
     api.add_resource(AuthLogin, "/auth/login")
     api.add_resource(UserResource, '/api/users', '/api/users/<int:user_id>')
 
+
     # serve frontend index.html (optional)
     @app.route('/')
     def index():
         return render_template('index.html')
+
+    @app.route("/dashboard")
+    def dashboard():
+        return render_template("dashboard.html")
 
     with app.app_context():
         db.create_all()

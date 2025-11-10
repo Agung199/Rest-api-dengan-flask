@@ -1,118 +1,45 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="id">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Flask Modular App</title>
-
-  <!-- Bootstrap (opsional: membuat tampilan cepat rapi) -->
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Flask App — Login / Register</title>
+  <link href="{{ url_for('static', filename='css/style.css') }}" rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-
-  <!-- CSS kustom (letakkan file di static/css/style.css) -->
-  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
-
-  <!-- small inline style to keep example neat -->
-  <style>
-    body { background:#f7f7f7; padding-top:30px; }
-    .card { margin-bottom:20px; }
-    #tokenBox { word-break: break-all; font-size:0.85rem; }
-  </style>
 </head>
 <body>
-  <div class="container">
-
-    <!-- Header / Navbar sederhana -->
-    <nav class="navbar navbar-expand-lg navbar-light bg-white mb-4 rounded shadow-sm">
-      <div class="container-fluid">
-        <a class="navbar-brand" href="#">Flask Modular App</a>
-        <div class="d-flex align-items-center">
-          <!-- TOKEN DISPLAY: tampilkan token user saat sudah login -->
-          <!-- ID: tokenBox (dipakai oleh JS bila mau menampilkan token) -->
-          <div id="tokenBox" class="me-3 text-truncate" style="max-width:420px; display:none;"></div>
-
-          <!-- LOGOUT BUTTON: dipakai JS untuk removeToken -->
-          <!-- ID: logoutBtn -->
-          <button id="logoutBtn" class="btn btn-outline-danger btn-sm" style="display:none;">Logout</button>
-        </div>
-      </div>
-    </nav>
-
-    <!-- Register card -->
-    <div class="card shadow-sm">
+  <div class="container py-5">
+    <div class="card mx-auto shadow" style="max-width:900px;">
       <div class="card-body">
-        <h5 class="card-title">Register User</h5>
-        <form id="registerForm" class="row g-2">
-          <div class="col-md-6">
-            <input class="form-control" type="text" id="nama" placeholder="Nama" required>
-          </div>
-          <div class="col-md-6">
-            <input class="form-control" type="password" id="password" placeholder="Password" required>
-          </div>
-          <div class="col-12">
-            <button class="btn btn-primary" type="submit">Daftar</button>
-          </div>
-        </form>
-      </div>
-    </div>
+        <h2 class="mb-3">Selamat datang — Daftar / Login</h2>
 
-    <!-- Login card -->
-    <div class="card shadow-sm">
-      <div class="card-body">
-        <h5 class="card-title">Login User</h5>
-        <form id="loginForm" class="row g-2">
+        <div class="row">
           <div class="col-md-6">
-            <input class="form-control" type="text" id="loginNama" placeholder="Nama" required>
+            <h5>Register</h5>
+            <form id="registerForm" class="mb-3">
+              <div class="mb-2"><input id="nama" class="form-control" placeholder="Nama" required></div>
+              <div class="mb-2"><input id="password" type="password" class="form-control" placeholder="Password" required></div>
+              <div><button class="btn btn-primary w-100" type="submit">Daftar</button></div>
+            </form>
           </div>
+
           <div class="col-md-6">
-            <input class="form-control" type="password" id="loginPassword" placeholder="Password" required>
+            <h5>Login</h5>
+            <form id="loginForm" class="mb-3">
+              <div class="mb-2"><input id="loginNama" class="form-control" placeholder="Nama" required></div>
+              <div class="mb-2"><input id="loginPassword" type="password" class="form-control" placeholder="Password" required></div>
+              <div><button class="btn btn-success w-100" type="submit">Login</button></div>
+            </form>
+
+            <div id="hint" class="small text-muted">Setelah login, kamu akan diarahkan ke dashboard.</div>
           </div>
-          <div class="col-12">
-            <button class="btn btn-success" type="submit">Login</button>
-          </div>
-        </form>
-      </div>
-    </div>
-
-    <!-- Data pengguna -->
-    <div class="card shadow-sm">
-      <div class="card-body">
-        <h5 class="card-title">Data Pengguna</h5>
-
-        <!-- tombol untuk menampilkan semua user -->
-        <div class="mb-3">
-          <button id="getUsers" class="btn btn-primary">Tampilkan Semua User</button>
-          <!-- tombol ini optional; untuk testing tanpa login -->
-          <button id="getUsersNoAuth" class="btn btn-outline-secondary ms-2">Tampilkan (tanpa token)</button>
-        </div>
-
-        <!-- TABEL USER: lebih rapi daripada <ul> -->
-        <div class="table-responsive">
-          <table class="table table-sm table-striped" id="tabelUser">
-            <thead>
-              <tr>
-                <th>ID</th>
-                <th>Nama</th>
-                <th>Umur</th>
-                <th>Alamat</th>
-                <th>Aksi</th>
-              </tr>
-            </thead>
-            <tbody>
-              <!-- Row akan diisi oleh JS -->
-            </tbody>
-          </table>
         </div>
 
       </div>
     </div>
-
-    <!-- optional: modal konfirmasi hapus bisa ditambahkan jika mau -->
   </div>
 
-  <!-- JS dependencies -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-
-  <!-- file JS kustom (script.js) -->
   <script src="{{ url_for('static', filename='js/script.js') }}"></script>
 </body>
 </html>
